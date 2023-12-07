@@ -27,7 +27,12 @@
             activeItemIndex: number;
             chartItems: Character[],
             page: number,
-            pages: number
+            pages: number,
+            genderFilterItems: Array<string>,
+            statusFilterItems: Array<string>,
+            genderFilterValue: string | null,
+            statusFilterValue: string | null
+
         } {
             return {
                 activeItem: null,
@@ -36,6 +41,10 @@
                 chartItems: [],
                 page: 1,
                 pages: 1,
+                genderFilterItems: ['Female', 'Male', 'Genderless', 'unknown'],
+                statusFilterItems: ['Alive', 'Dead', 'unknown'],
+                genderFilterValue: null,
+                statusFilterValue: null
             }
         },
 
@@ -46,7 +55,20 @@
         watch: {
             page(newVal: number, oldVal: number) {
                 this.onPageChange(newVal);
-            }
+            },
+
+            statusFilterValue(newVal: string) {
+                //console.log('Watch Status: ' + newVal);
+                this.onStatusFilterChange(newVal);
+            },
+
+
+            genderFilterValue(newVal: string) {
+                //console.log('Watch Gender: ' + newVal);
+                this.onGenderFilterChange(newVal);
+            },
+
+
         },
 
         async mounted() {
@@ -70,20 +92,7 @@
                 //console.log('isMobile: ' + this.isMobile);
             },
 
-            async loadPage(pageNumber: number | undefined) {
 
-                if (!pageNumber)
-                    pageNumber = 1;
-
-                const charResp = await ramapi.getCharacters({ page: pageNumber });
-                this.$data.pages = charResp.data.info?.pages ?? 1;
-                let charPageData = charResp.data.results;
-                this.$data.chartItems = charPageData ?? [];
-
-                console.log('Characters on the Page: ' + charPageData?.length);
-                console.log('Characters List: ' + charResp);
-
-            },
 
             onChartClick(item: Character, index: number) {
 
@@ -108,8 +117,48 @@
 
             },
 
+            onStatusFilterChange(filterValue: string) {
+                //console.log('Status Filter: ' + filterValue);
+                this.loadPage(1);
+            },
 
-        },
+
+            onGenderFilterChange(filterValue: string) {
+                //console.log('Gender Filter: ' + filterValue);
+                this.loadPage(1);
+            },
+
+            async loadPage(pageNumber: number | undefined) {
+
+                if (!pageNumber)
+                    pageNumber = 1;
+
+                //let filterObj = { page: pageNumber }
+                let filterObj: { [k: string]: any } = {};
+                filterObj.page = pageNumber;
+
+                if (this.$data.statusFilterValue)
+                    filterObj.status = this.$data.statusFilterValue;
+
+                if (this.$data.genderFilterValue)
+                    filterObj.gender = this.$data.genderFilterValue;
+
+
+                console.log('Filter Object: ' + filterObj);
+
+                //const charResp = await ramapi.getCharacters({ page: pageNumber });
+                const charResp = await ramapi.getCharacters(filterObj);
+                this.$data.pages = charResp.data.info?.pages ?? 1;
+                let charPageData = charResp.data.results;
+                this.$data.chartItems = charPageData ?? [];
+
+                console.log('Characters on the Page: ' + charPageData?.length);
+                console.log('Characters List: ' + charResp);
+
+            },
+
+
+        }
 
     })
 
@@ -133,6 +182,31 @@
                                 <h1 class="green">Rick and Morty Characters List</h1>
                             </div>
 
+                            <v-row>
+
+
+                                <!--Status-->
+                                <v-col>
+                                    <v-select :items="statusFilterItems"
+                                              density="comfortable"
+                                              clearable
+                                              v-model="statusFilterValue"
+                                              label="Status">
+                                    </v-select>
+                                </v-col>
+
+                                <v-col>
+                                    <!--Gender-->
+                                    <v-select :items="genderFilterItems"
+                                              density="comfortable"
+                                              clearable
+                                              v-model="genderFilterValue"
+                                              label="Gender">
+                                    </v-select>
+                                </v-col>
+
+                            </v-row>
+
                             <v-card class="mx-auto">
 
                                 <v-list :items="chartItems" style="max-height:70vh">
@@ -153,7 +227,7 @@
                                             </v-avatar>
                                             <v-card id="itemCardContent">
                                                 <v-list-item-title v-text="item.name" class="mb-1"></v-list-item-title>
-                                                <v-list-item-subtitle v-html="item.status"></v-list-item-subtitle>
+                                                <v-list-item-subtitle v-html="item.status + ' | ' + item.gender"></v-list-item-subtitle>
                                             </v-card>
                                         </v-card>
                                     </v-list-item>
