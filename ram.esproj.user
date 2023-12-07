@@ -7,7 +7,7 @@
   "type": "chrome",
   "request": "launch",
   "url": "http://localhost:5173",
-  "webRoot": "C:\\Projects\\RickAndMorty\\RaM\\RaM"
+  "webRoot": "C:\\Projects\\RickAndMorty\\RickAndMorty"
 }</LaunchJsonTarget>
   </PropertyGroup>
 </Project>

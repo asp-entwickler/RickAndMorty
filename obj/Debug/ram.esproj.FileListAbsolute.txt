@@ -1,1 +1,2 @@
 C:\Projects\RickAndMorty\RaM\RaM\obj\Debug\ram.esproj.CoreCompileInputs.cache
+C:\Projects\RickAndMorty\RickAndMorty\obj\Debug\ram.esproj.CoreCompileInputs.cache

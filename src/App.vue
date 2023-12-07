@@ -2,71 +2,56 @@
     import HelloWorld from './components/HelloWorld.vue'
     import ChartList from './components/ChartList.vue'
     import TheWelcome from './components/TheWelcome.vue'
+    import ChartDetails from './components/ChartDetails.vue'
 
     import * as ramapi from 'rickmortyapi';
+    import type { Character, Location } from '@/Interfaces';
 
     import { defineComponent, type PropType } from 'vue';
 
+    //import { ref, watch } from 'vue';
+
     export default defineComponent({
-
-
-        data() {
-            return {
-                isMobile: false,
-                selectedItem: null,
-                activeItem: false,
-                activeItemIndex: -1,
-                //chartItems: [] as PropType<ramapi.Character[]>
-                chartItems: [] as ramapi.Character[]
-
-                    //{
-                    //    idx: 1,
-                    //    prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
-                    //    title: 'Brunch this weekend?',
-                    //    subtitle: `<span class="text-primary">Ali Connors</span> &mdash; I'll be in your neighborhood doing errands this weekend. Do you want to hang out?`,
-                    //},
-
-                    //{
-                    //    idx: 2,
-                    //    prependAvatar: 'https://cdn.vuetifyjs.com/images/lists/2.jpg',
-                    //    title: 'Summer BBQ',
-                    //    subtitle: `<span class="text-primary">to Alex, Scott, Jennifer</span> &mdash; Wish I could come, but I'm out of town this weekend.`,
-                    //},
-
-                //]
-            }
-        },
 
         components: {
             ChartList,
             HelloWorld,
-            TheWelcome
+            TheWelcome,
+            ChartDetails
 
         },
 
-        setup(props) {
+        data(): {
+            activeItem: Character | null;
+            isMobile: boolean;
+            activeItemIndex: number;
+            chartItems: Character[],
+            page: number,
+            pages: number
+        } {
+            return {
+                activeItem: null,
+                isMobile: false,
+                activeItemIndex: -1,
+                chartItems: [],
+                page: 1,
+                pages: 1,
+            }
+        },
 
-            //this.chartItems
+        setup(props: any) {
 
+        },
+
+        watch: {
+            page(newVal: number, oldVal: number) {
+                this.onPageChange(newVal);
+            }
         },
 
         async mounted() {
-            console.log('Chart List Mounted');
-            const charResp = await ramapi.getCharacters();
-            let pages = charResp.data.info?.pages;
-            let charPage = charResp.data.results;
-            this.$data.chartItems = charPage!;
-
-
-
-            console.log('Characters on the Page: ' + charPage?.length);
-
-            console.log('Characters List: ' + charResp);
-
-            //this.$data.chartItems = charPage;
-
-
-            //this.$data.chartItems.splice(0, this.$data.chartItems.length, ...charPage);
+            //console.log('Chart List Mounted');
+            this.loadPage(1);
         },
 
         created() {
@@ -84,12 +69,46 @@
                 this.isMobile = window.innerWidth < 1024;
                 //console.log('isMobile: ' + this.isMobile);
             },
-            onChartClick(item: any, index: number) {
 
+            async loadPage(pageNumber: number | undefined) {
+
+                if (!pageNumber)
+                    pageNumber = 1;
+
+                const charResp = await ramapi.getCharacters({ page: pageNumber });
+                this.$data.pages = charResp.data.info?.pages ?? 1;
+                let charPageData = charResp.data.results;
+                this.$data.chartItems = charPageData ?? [];
+
+                console.log('Characters on the Page: ' + charPageData?.length);
+                console.log('Characters List: ' + charResp);
+
+            },
+
+            onChartClick(item: Character, index: number) {
+
+                console.log("onChartClick");
+
+                this.$data.activeItem = item;
+
+                const episodesArray = item.episode.map((str) => {
+                    const parts = str.split('/');
+                    return parts[parts.length - 1];
+                });
+
+                this.$data.activeItem.episode = episodesArray;
                 this.$data.activeItemIndex = index;
-                console.log("Chart Idx: " + item);
+                //console.log("Chart Idx: " + item);
 
-            }
+            },
+
+            onPageChange(newPage: number) {
+                //console.log("newPage: " + newPage);
+                this.loadPage(newPage);
+
+            },
+
+
         },
 
     })
@@ -116,7 +135,7 @@
 
                             <v-card class="mx-auto">
 
-                                <v-list :items="chartItems" style="max-height:50vh">
+                                <v-list :items="chartItems" style="max-height:70vh">
                                     <v-list-item id="itemCharacter"
                                                  v-for="(item, id) in chartItems" ma-0 pa-0
                                                  :key="id"
@@ -126,30 +145,46 @@
                                                  lines="three"
                                                  density="compact"
                                                  :class="{ 'active-list-item': activeItemIndex === id }">
-                                            
-                                            <v-card id="itemCard" 
-                                                    class="d-flex align-center">
-                                                <v-avatar size="40" class="mr-4 ml-4">
-                                                    <img :src="item.image" style="max-height: 40px; max-width: 40px;" alt="avatar">
-                                                </v-avatar>
-                                                <v-card id="itemCardContent">
-                                                    <v-list-item-title v-text="item.name" class="mb-1"></v-list-item-title>
-                                                    <v-list-item-subtitle v-html="item.status"></v-list-item-subtitle>
-                                                </v-card>
+
+                                        <v-card id="itemCard"
+                                                class="d-flex align-center">
+                                            <v-avatar size="40" class="mr-4 ml-4">
+                                                <img :src="item.image" style="max-height: 40px; max-width: 40px;" alt="avatar">
+                                            </v-avatar>
+                                            <v-card id="itemCardContent">
+                                                <v-list-item-title v-text="item.name" class="mb-1"></v-list-item-title>
+                                                <v-list-item-subtitle v-html="item.status"></v-list-item-subtitle>
                                             </v-card>
-                                        </v-list-item>
+                                        </v-card>
+                                    </v-list-item>
                                 </v-list>
 
                             </v-card>
 
-                        </div>
+                            <v-pagination v-model="page"
+                                          prev-icon="mdi-menu-left"
+                                          next-icon="mdi-menu-right"
+                                          :length="pages"
+                                          class="pt-3"
+                                          theme="dark"
+                                          rounded="1">
+                            </v-pagination>
+
+                        </div>  <!-- box -->
 
                     </v-col>
 
                     <!-- Details -->
                     <v-col :cols="isMobile ? 12 : 6">
+
                         <div class="box">
-                            <TheWelcome />
+
+                            <div class="greetings">
+                                <h1 class="green">Character Detail</h1>
+                            </div>
+
+                            <!--<ChartDetails />-->
+                            <ChartDetails :character="activeItem" />
                         </div>
                     </v-col>
                 </v-row>
@@ -163,6 +198,8 @@
 
 <style scoped>
 
+
+
     #itemCharacter.active-list-item {
         background-color: #444444;
     }
@@ -172,9 +209,9 @@
     }
 
     .avatar img {
-        border-radius: 50%; /* Make the image rounded */
-        width: 48px; /* Adjust the width as needed */
-        height: 48px; /* Adjust the height as needed */
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
     }
 
     .box {
@@ -192,29 +229,9 @@
         margin: 0 auto 2rem;
     }
 
-    /*    @media (min-width: 1024px) {
-        header {
-            display: flex;
-            place-items: start;
-            padding-right: calc(var(--section-gap) / 2);
-        }
-
-        .logo {
-            margin: 0 2rem 0 0;
-        }
-
-        header .wrapper {
-            display: flex;
-            place-items: flex-start;
-            flex-wrap: wrap;
-        }
-    }*/
-
-
     #app > div {
         width: 100% !important;
     }
-
 
     h1 {
         font-weight: 500;
