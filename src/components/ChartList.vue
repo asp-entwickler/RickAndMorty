@@ -3,17 +3,7 @@
     import * as ramapi from 'rickmortyapi';
 
     export default defineComponent({
-        //components: {
-        //    ChartList
-        //}
-
-        props: {
-            //msg: {
-            //    readonly: false,
-            //    default: '',
-            //    type: String
-            //},
-        },
+        props: {},
 
         data() {
             return {
@@ -21,23 +11,13 @@
             }
         },
 
-        setup(props) {
-
-            //props.msg
-
-        },
+        setup(props) {},
 
         async mounted() {
-            console.log('Chart List Mounted');
             const charResp = await ramapi.getCharacters();
             let pages = charResp.data.info?.pages;
             let charPage = charResp.data.results;
-
-            console.log('Characters on the Page: ' + charPage?.length);
-
-            console.log('Characters List: ' + charResp);
         },
-
 
     })
 </script>
@@ -45,22 +25,14 @@
 <template>
     <div class="greetings">
         <h1 class="green">Rick and Morty Characters List</h1>
-        <!--<h3>
-          You’ve successfully created a project with
-          <a href="https://vitejs.dev/" target="_blank" rel="noopener">Vite</a> +
-          <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>.
-        </h3>-->
     </div>
 
     <v-card class="mx-auto"
             max-width="450">
         <v-toolbar color="cyan-lighten-1">
             <v-btn variant="text" icon="mdi-menu"></v-btn>
-
             <v-toolbar-title>Inbox</v-toolbar-title>
-
             <v-spacer></v-spacer>
-
             <v-btn variant="text" icon="mdi-magnify"></v-btn>
         </v-toolbar>
 

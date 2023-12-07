@@ -1,24 +1,13 @@
 <script lang="ts">
-    import HelloWorld from './components/HelloWorld.vue'
-    import ChartList from './components/ChartList.vue'
-    import TheWelcome from './components/TheWelcome.vue'
     import ChartDetails from './components/ChartDetails.vue'
-
     import * as ramapi from 'rickmortyapi';
     import type { Character, Location } from '@/Interfaces';
-
     import { defineComponent, type PropType } from 'vue';
-
-    //import { ref, watch } from 'vue';
 
     export default defineComponent({
 
         components: {
-            ChartList,
-            HelloWorld,
-            TheWelcome,
             ChartDetails
-
         },
 
         data(): {
@@ -48,38 +37,28 @@
             }
         },
 
-        setup(props: any) {
-
-        },
+        setup(props: any) { },
 
         watch: {
+
             page(newVal: number, oldVal: number) {
                 this.onPageChange(newVal);
             },
-
             statusFilterValue(newVal: string) {
-                //console.log('Watch Status: ' + newVal);
                 this.onStatusFilterChange(newVal);
             },
-
-
             genderFilterValue(newVal: string) {
-                //console.log('Watch Gender: ' + newVal);
                 this.onGenderFilterChange(newVal);
             },
-
-
         },
 
         async mounted() {
-            //console.log('Chart List Mounted');
             this.loadPage(1);
         },
 
         created() {
             this.checkMobile();
             window.addEventListener("resize", this.checkMobile);
-
         },
         beforeDestroy() {
             window.removeEventListener("resize", this.checkMobile);
@@ -89,14 +68,9 @@
 
             checkMobile() {
                 this.isMobile = window.innerWidth < 1024;
-                //console.log('isMobile: ' + this.isMobile);
             },
 
-
-
             onChartClick(item: Character, index: number) {
-
-                console.log("onChartClick");
 
                 this.$data.activeItem = item;
 
@@ -106,25 +80,18 @@
                 });
 
                 this.$data.activeItem.episode = episodesArray;
-                this.$data.activeItemIndex = index;
-                //console.log("Chart Idx: " + item);
-
+                this.$data.activeItemIndex = item.id;
             },
 
             onPageChange(newPage: number) {
-                //console.log("newPage: " + newPage);
                 this.loadPage(newPage);
-
             },
 
             onStatusFilterChange(filterValue: string) {
-                //console.log('Status Filter: ' + filterValue);
                 this.loadPage(1);
             },
 
-
             onGenderFilterChange(filterValue: string) {
-                //console.log('Gender Filter: ' + filterValue);
                 this.loadPage(1);
             },
 
@@ -133,7 +100,6 @@
                 if (!pageNumber)
                     pageNumber = 1;
 
-                //let filterObj = { page: pageNumber }
                 let filterObj: { [k: string]: any } = {};
                 filterObj.page = pageNumber;
 
@@ -143,48 +109,28 @@
                 if (this.$data.genderFilterValue)
                     filterObj.gender = this.$data.genderFilterValue;
 
-
-                console.log('Filter Object: ' + filterObj);
-
-                //const charResp = await ramapi.getCharacters({ page: pageNumber });
                 const charResp = await ramapi.getCharacters(filterObj);
                 this.$data.pages = charResp.data.info?.pages ?? 1;
                 let charPageData = charResp.data.results;
                 this.$data.chartItems = charPageData ?? [];
-
-                console.log('Characters on the Page: ' + charPageData?.length);
-                console.log('Characters List: ' + charResp);
-
             },
-
-
         }
-
     })
-
 
 </script>
 
 <template>
     <v-app>
-
         <v-main>
-
             <v-container fluid ma-0 pa-0>
-
                 <v-row style="border: 1px solid blue; min-width: 250px;">
-
                     <v-col :cols="isMobile ? 12 : 6">
-
                         <div class="box">
-
                             <div class="greetings">
                                 <h1 class="green">Rick and Morty Characters List</h1>
                             </div>
 
                             <v-row>
-
-
                                 <!--Status-->
                                 <v-col>
                                     <v-select :items="statusFilterItems"
@@ -195,8 +141,8 @@
                                     </v-select>
                                 </v-col>
 
+                                <!--Gender-->
                                 <v-col>
-                                    <!--Gender-->
                                     <v-select :items="genderFilterItems"
                                               density="comfortable"
                                               clearable
@@ -204,21 +150,19 @@
                                               label="Gender">
                                     </v-select>
                                 </v-col>
-
                             </v-row>
 
                             <v-card class="mx-auto">
-
                                 <v-list :items="chartItems" style="max-height:70vh">
                                     <v-list-item id="itemCharacter"
                                                  v-for="(item, id) in chartItems" ma-0 pa-0
-                                                 :key="id"
+                                                 :key="item.id"
                                                  :value="item"
                                                  @click="onChartClick(item, id)"
                                                  clickable
                                                  lines="three"
                                                  density="compact"
-                                                 :class="{ 'active-list-item': activeItemIndex === id }">
+                                                 :class="{ 'active-list-item': activeItemIndex === item.id }">
 
                                         <v-card id="itemCard"
                                                 class="d-flex align-center">
@@ -231,8 +175,8 @@
                                             </v-card>
                                         </v-card>
                                     </v-list-item>
+                                    
                                 </v-list>
-
                             </v-card>
 
                             <v-pagination v-model="page"
@@ -250,29 +194,20 @@
 
                     <!-- Details -->
                     <v-col :cols="isMobile ? 12 : 6">
-
                         <div class="box">
-
                             <div class="greetings">
                                 <h1 class="green">Character Detail</h1>
                             </div>
-
-                            <!--<ChartDetails />-->
                             <ChartDetails :character="activeItem" />
                         </div>
                     </v-col>
                 </v-row>
             </v-container>
-
-
         </v-main>
-
     </v-app>
 </template>
 
 <style scoped>
-
-
 
     #itemCharacter.active-list-item {
         background-color: #444444;
@@ -291,7 +226,6 @@
     .box {
         padding: 20px;
         text-align: left;
-        /*border: 1px solid gray;*/
     }
 
     header {

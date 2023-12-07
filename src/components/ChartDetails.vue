@@ -1,48 +1,12 @@
 <script lang="ts">
 
     import { defineComponent, type PropType } from 'vue';
-    import * as ramapi from 'rickmortyapi';
     import type { Character, Location } from '@/Interfaces';
-
-    import WelcomeItem from './WelcomeItem.vue'
-    import DocumentationIcon from './icons/IconDocumentation.vue'
-    import ToolingIcon from './icons/IconTooling.vue'
-    import EcosystemIcon from './icons/IconEcosystem.vue'
-    import CommunityIcon from './icons/IconCommunity.vue'
-    import SupportIcon from './icons/IconSupport.vue'
-
-    //interface Location {
-    //    name: string;
-    //    url: string;
-    //}
-
-    //interface Character {
-    //    id: number;
-    //    name: string;
-    //    status: string;
-    //    species: string;
-    //    type: string;
-    //    gender: string;
-    //    origin: Location;
-    //    location: Location;
-    //    image: string;
-    //    episode: string[];
-    //    url: string;
-    //    created: string;
-    //}
 
     export default defineComponent({
 
         name: 'ChartDetail',
-
-        components: {
-            WelcomeItem,
-            DocumentationIcon,
-            ToolingIcon,
-            EcosystemIcon,
-            CommunityIcon,
-            SupportIcon
-        },
+        components: {},
 
         props: {
             character: {
@@ -51,9 +15,7 @@
             }
         },
 
-        mounted() {
-            console.log('Chart Details Mounted: ' + this.character);
-        }
+        mounted() {}
     });
 
 </script>
